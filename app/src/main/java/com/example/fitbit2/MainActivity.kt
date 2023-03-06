@@ -4,17 +4,19 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fitbit2.databinding.ActivityMainBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val inputs = mutableListOf<DisplayInput>()
-    private lateinit var inputsRecyclerView: RecyclerView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -22,36 +24,31 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        inputsRecyclerView = findViewById(R.id.inputslist)
-        val inputAdapter = InputAdapter(inputs)
-        inputsRecyclerView.adapter = inputAdapter
+        val fragmentManager: FragmentManager = supportFragmentManager
 
-        inputsRecyclerView.layoutManager = LinearLayoutManager(this).also {
-            val dividerItemDecoration = DividerItemDecoration(this, it.orientation)
-            inputsRecyclerView.addItemDecoration(dividerItemDecoration)
-        }
+        val fragment1: Fragment = SleepTrackerFragment()
+        val fragment2: Fragment = SleepSummaryFragment()
 
-        lifecycleScope.launch {
-            (application as InputApplication).db.inputDao().getAll().collect { databaseList ->
-                databaseList.map { entity ->
-                    DisplayInput(
-                        entity.sleepType,
-                        entity.sleepHours
-                    )
-                }.also { mappedList ->
-                    inputs.clear()
-                    inputs.addAll(mappedList)
-                    inputAdapter.notifyDataSetChanged()
-                }
+        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_navigation)
+
+        bottomNavigationView.setOnItemSelectedListener { item ->
+            lateinit var fragment: Fragment
+            when (item.itemId) {
+                R.id.action_Slist -> fragment = fragment1
+                R.id.action_Ssum -> fragment = fragment2
             }
+            fragmentManager.beginTransaction().replace(R.id.input_frame_layout, fragment).commit()
+            true
         }
 
-        var inputbutton = findViewById<Button>(R.id.inputbutton)
+        // Call helper method to swap the FrameLayout with the fragment
+        replaceFragment(SleepTrackerFragment())
+    }
 
-        inputbutton.setOnClickListener(){
-            val intent = Intent(this, InputActivity::class.java)
-            this.startActivity(intent)
-        }
-
+    private fun replaceFragment(sleepListFragment: SleepTrackerFragment) {
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.input_frame_layout, sleepListFragment)
+        fragmentTransaction.commit()
     }
 }
