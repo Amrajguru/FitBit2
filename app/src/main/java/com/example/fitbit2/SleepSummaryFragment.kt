@@ -1,6 +1,7 @@
 package com.example.fitbit2
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,35 @@ class SleepSummaryFragment : Fragment() {
     private lateinit var MaxSleepText: TextView
     private lateinit var MinSleepText: TextView
 
+    fun valueGen(view:View, inputs: List<DisplayInput>){
+        var AveSleep: Int = 0
+        var MaxSleep: Int = 0
+        var MinSleep: Int = 0
+        AveSleepText = view.findViewById<TextView>(R.id.AveSleep)
+        MaxSleepText = view.findViewById<TextView>(R.id.MaxSleep)
+        MinSleepText = view.findViewById<TextView>(R.id.MinSleep)
+
+        var totalSleep = 0
+        if(inputs.size!=0) {
+            for (i in 0..inputs.size) {
+                if (inputs[i].sleepType != null) {
+                    var sleepval: Int = inputs[i].sleepType!!.toInt()
+                    if (sleepval > MaxSleep) {
+                        MaxSleep = sleepval
+                    }
+                    if (sleepval < MinSleep) {
+                        MinSleep = sleepval
+                    }
+                    totalSleep += sleepval
+                }
+            }
+            AveSleep = totalSleep / inputs.size
+        }
+        AveSleepText.text=AveSleep.toString()
+        MaxSleepText.text=MaxSleep.toString()
+        MinSleepText.text=MinSleep.toString()
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -31,47 +61,22 @@ class SleepSummaryFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        var AveSleep: Number =0
-        var MaxSleep: Number =0
-        var MinSleep: Number =0
         super.onViewCreated(view, savedInstanceState)
+
         lifecycleScope.launch {
-            (activity?.application as InputApplication).db.inputDao().getAll()
-                .collect { databaseList ->
-                    databaseList.map { entity ->
-                        DisplayInput(
-                            entity.sleepType,
-                            entity.sleepHours
-                        )
-                    }.also { mappedList ->
-                        inputs.addAll(mappedList)
-                    }
+            (activity?.application as InputApplication).db.inputDao().getAll().collect { databaseList ->
+                databaseList.map { entity ->
+                    DisplayInput(
+                        entity.sleepType,
+                        entity.sleepHours
+                    )
+                }.also { mappedList ->
+                    inputs.clear()
+                    inputs.addAll(mappedList)
                 }
-        }
-
-        AveSleepText = view.findViewById<TextView>(R.id.AveSleep)
-        MaxSleepText = view.findViewById<TextView>(R.id.MaxSleep)
-        MinSleepText = view.findViewById<TextView>(R.id.MinSleep)
-
-        var totalSleep = 0
-        for (i in 0..inputs.size){
-            var sleepval=inputs[i].sleepHours?.toInt()
-            if (sleepval != null) {
-                if (sleepval > MaxSleep) {
-                        MaxSleep = sleepval
-                }
-                if (sleepval < MinSleep) {
-                        MinSleep = sleepval
-                }
-                    totalSleep += sleepval
             }
         }
-        AveSleep = totalSleep/inputs.size
-
-        AveSleepText.text=AveSleep.toString()
-        MaxSleepText.text=MaxSleep.toString()
-        MinSleepText.text=MinSleep.toString()
-
+        valueGen(view, inputs)
     }
 
     companion object {

@@ -2,6 +2,7 @@ package com.example.fitbit2
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fitbit2.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 
 class SleepTrackerFragment : Fragment() {
@@ -42,7 +44,7 @@ class SleepTrackerFragment : Fragment() {
 
 override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    lifecycleScope.launch {
+    lifecycleScope.launch() {
         (activity?.application as InputApplication).db.inputDao().getAll().collect { databaseList ->
             databaseList.map { entity ->
                 DisplayInput(
