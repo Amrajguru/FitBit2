@@ -21,16 +21,16 @@ class SleepSummaryFragment : Fragment() {
     fun valueGen(view:View, inputs: List<DisplayInput>){
         var AveSleep: Int = 0
         var MaxSleep: Int = 0
-        var MinSleep: Int = 0
+        var MinSleep: Int = Int.MAX_VALUE
         AveSleepText = view.findViewById<TextView>(R.id.AveSleep)
         MaxSleepText = view.findViewById<TextView>(R.id.MaxSleep)
         MinSleepText = view.findViewById<TextView>(R.id.MinSleep)
 
         var totalSleep = 0
         if(inputs.size!=0) {
-            for (i in 0..inputs.size) {
-                if (inputs[i].sleepType != null) {
-                    var sleepval: Int = inputs[i].sleepType!!.toInt()
+            for (i in 0..inputs.size-1) {
+                if (inputs[i].sleepHours != null) {
+                    var sleepval: Int = inputs[i].sleepHours!!.toInt()
                     if (sleepval > MaxSleep) {
                         MaxSleep = sleepval
                     }
@@ -73,10 +73,10 @@ class SleepSummaryFragment : Fragment() {
                 }.also { mappedList ->
                     inputs.clear()
                     inputs.addAll(mappedList)
+                    valueGen(view, inputs)
                 }
             }
         }
-        valueGen(view, inputs)
     }
 
     companion object {

@@ -19,8 +19,8 @@ class InputActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.user_item)
 
-        sleepTypeTextView = findViewById(R.id.SleepAmountInput)
-        sleepHrsTextView = findViewById(R.id.SleepTypeInput)
+        sleepTypeTextView = findViewById(R.id.SleepTypeInput)
+        sleepHrsTextView = findViewById(R.id.SleepAmountInput)
 
 
         var itembutton = findViewById<Button>(R.id.itembutton)
